@@ -174,7 +174,7 @@
     {{#each dates}}
       <section class="daily-content js-toggle-accordions-scope">
         <h2 class="daily-heading">
-          <button class="daily-heading-toggle" data-action="toggle-accordions" title="Clique para expandir ou recolher as fontes deste dia.">
+          <button class="daily-heading-toggle" type="button" aria-expanded="true" title="Clique para expandir ou recolher as fontes deste dia.">
             <time class="daily-heading-toggle__weekday js-offset-weekday" data-offset-date={{isoOffsetPublishDate}} datetime="{{isoUtcPublishTime}}">{{isoOffsetPublishDate}}</time>
             <time class="daily-heading-toggle__date js-offset-date" data-offset-date={{isoOffsetPublishDate}} datetime="{{isoUtcPublishTime}}"></time>
           </button>
@@ -184,7 +184,7 @@
             <li class="card__section">
               <section class="js-toggle-accordions-scope">
                 <h3 class="source-heading">
-                  <button class="source-heading__name" data-action="toggle-accordions" title="Clique para expandir ou recolher esta fonte.">{{title}}</button>
+                  <button class="source-heading__name" type="button" aria-expanded="true" title="Clique para expandir ou recolher esta fonte.">{{title}}</button>
                   <a class="source-heading__link" href="{{siteUrl}}" target="_blank" rel="noopener">Visitar fonte ↗</a>
                 </h3>
                 <section class="articles-per-source">
@@ -224,6 +224,29 @@
       <a class="footer-link" href="{{projectUrl}}">osmosfeed {{cliVersion}}</a>
     </footer>
     <script src="index.js?v1.14.4"></script>
+    <script>
+      // Os controles do dia e da fonte expandem/recolhem os detalhes de notícias
+      // somente dentro do respectivo escopo, sem interferir nos accordions individuais.
+      document.addEventListener("click", function (event) {
+        const button = event.target.closest(".daily-heading-toggle, .source-heading__name");
+        if (!button) return;
+
+        const scope = button.classList.contains("daily-heading-toggle")
+          ? button.closest(".daily-content")
+          : button.closest(".js-toggle-accordions-scope");
+        if (!scope) return;
+
+        const details = Array.from(scope.querySelectorAll("details.article-expander"));
+        if (!details.length) return;
+
+        const shouldOpen = details.some((item) => !item.open);
+        details.forEach((item) => { item.open = shouldOpen; });
+        button.setAttribute("aria-expanded", String(shouldOpen));
+        button.classList.toggle("is-expanded", shouldOpen);
+        event.preventDefault();
+        event.stopPropagation();
+      });
+    </script>
     <!-- %before-body-end.html% -->
   </body>
 </html>
