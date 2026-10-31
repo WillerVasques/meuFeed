@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Builds conservative RSS feeds from configured public news pages."""
+"""Builds RSS feeds from configured HTML pages or native RSS/Atom feeds."""
 from datetime import datetime, timezone
-from email.utils import format_datetime
+from email.utils import format_datetime, parsedate_to_datetime
 from html import unescape
 from pathlib import Path
 from urllib.parse import urljoin, urlparse, urlunparse
@@ -16,14 +16,87 @@ OUT = ROOT / "docs" / "generated-feeds"
 UA = "meuFeed/1.0 (+https://willervasques.github.io/meuFeed/)"
 
 def canonical_url(raw, base, allowed):
-    url = urljoin(base, raw.strip())
+    if not raw:
+        return None
+    url = urljoin(base, str(raw).strip())
     p = urlparse(url)
-    if p.scheme not in ("http", "https") or p.hostname not in allowed:
+    if p.scheme not in ("http", "https") or (p.hostname or "").lower() not in allowed:
         return None
     path = re.sub(r"/+", "/", p.path or "/")
     if path.endswith("/") and path != "/":
         path = path[:-1]
     return urlunparse((p.scheme, p.netloc.lower(), path, "", "", ""))
+
+def local_name(tag):
+    return tag.rsplit("}", 1)[-1].lower()
+
+def child_text(node, names):
+    for child in list(node):
+        if local_name(child.tag) in names:
+            value = "".join(child.itertext()).strip()
+            if value:
+                return value
+    return ""
+
+def feed_link(node, atom=False):
+    if atom:
+        links = [e for e in list(node) if local_name(e.tag) == "link"]
+        for link in links:
+            if link.attrib.get("rel", "alternate") == "alternate":
+                href = link.attrib.get("href")
+                if href:
+                    return href
+        return links[0].attrib.get("href", "") if links else ""
+    return child_text(node, {"link"})
+
+def parse_feed_date(value):
+    if not value:
+        return None
+    try:
+        result = parsedate_to_datetime(value)
+        if result.tzinfo is None:
+            result = result.replace(tzinfo=timezone.utc)
+        return result.astimezone(timezone.utc)
+    except (TypeError, ValueError, OverflowError):
+        try:
+            result = datetime.fromisoformat(value.replace("Z", "+00:00"))
+            if result.tzinfo is None:
+                result = result.replace(tzinfo=timezone.utc)
+            return result.astimezone(timezone.utc)
+        except (AttributeError, TypeError, ValueError):
+            return None
+
+def parse_native_feed(content, source, feed_url, allowed):
+    try:
+        root = ET.fromstring(content)
+    except ET.ParseError as exc:
+        raise ValueError(f"resposta não é XML/RSS/Atom válido: {exc}") from exc
+
+    root_name = local_name(root.tag)
+    atom = root_name == "feed"
+    nodes = [node for node in root.iter() if local_name(node.tag) in ({"entry"} if atom else {"item"})]
+    entries, seen = [], set()
+    for node in nodes:
+        title = " ".join(child_text(node, {"title"}).split())
+        raw_link = feed_link(node, atom=atom)
+        link = canonical_url(raw_link, feed_url, allowed)
+        if not title or not link or link in seen:
+            continue
+        seen.add(link)
+        description = child_text(node, {"description", "summary", "encoded", "content"})
+        description = " ".join(BeautifulSoup(unescape(description), "html.parser").get_text(" ", strip=True).split())
+        date_value = child_text(node, {"pubdate", "published", "updated", "date"})
+        published = parse_feed_date(date_value)
+        entries.append((published, title, link, description[:1200]))
+
+    entries.sort(
+        key=lambda e: (e[0] is not None, e[0] or datetime.min.replace(tzinfo=timezone.utc)),
+        reverse=True,
+    )
+    entries = entries[:60]
+    if not entries:
+        raise ValueError("feed XML foi lido, mas nenhum item com título e link permitido foi encontrado")
+    return entries
 
 def parse_date(soup, node):
     candidates = [
@@ -41,65 +114,14 @@ def parse_date(soup, node):
             continue
         try:
             d = datetime.fromisoformat(str(c).replace("Z", "+00:00"))
-            if d.tzinfo is None: d = d.replace(tzinfo=timezone.utc)
+            if d.tzinfo is None:
+                d = d.replace(tzinfo=timezone.utc)
             return d.astimezone(timezone.utc)
         except (ValueError, TypeError):
             pass
     return None
 
-def build(source):
-    base = source["base_url"]
-    allowed = set(source.get("allowed_hosts", [urlparse(base).hostname]))
-    fetch_ok = True
-    session = requests.Session()
-    session.headers.update({
-        "User-Agent": UA,
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        "Accept-Language": "pt-BR,pt;q=0.9,en;q=0.8",
-    })
-    try:
-        response = session.get(base, timeout=(10, 30))
-        print(
-            f"[INFO] {source['name']}: HTTP {response.status_code}; "
-            f"content-type={response.headers.get('Content-Type', '(missing)')}; "
-            f"server={response.headers.get('Server', '(missing)')}",
-            file=sys.stderr,
-        )
-        response.raise_for_status()
-        soup = BeautifulSoup(response.text, "html.parser")
-    except requests.exceptions.SSLError as exc:
-        # Preserve the full TLS exception for diagnosis in the Actions log.
-        print(
-            f"[ERROR] {source['name']}: SSL/TLS failure: {type(exc).__name__}: {exc}",
-            file=sys.stderr,
-        )
-        soup = BeautifulSoup("", "html.parser")
-        fetch_ok = False
-    except requests.exceptions.HTTPError as exc:
-        response = getattr(exc, "response", None)
-        status = response.status_code if response is not None else "(unknown)"
-        headers = response.headers if response is not None else {}
-        body = response.text if response is not None else ""
-        # Log only a bounded, text-only excerpt; avoid dumping large pages or cookies.
-        excerpt = " ".join(BeautifulSoup(body, "html.parser").get_text(" ", strip=True).split())[:800]
-        print(
-            f"[ERROR] {source['name']}: HTTP {status}; "
-            f"content-type={headers.get('Content-Type', '(missing)')}; "
-            f"server={headers.get('Server', '(missing)')}; "
-            f"response excerpt={excerpt!r}",
-            file=sys.stderr,
-        )
-        soup = BeautifulSoup("", "html.parser")
-        fetch_ok = False
-    except requests.RequestException as exc:
-        print(
-            f"[ERROR] {source['name']}: request failure: {type(exc).__name__}: {exc}",
-            file=sys.stderr,
-        )
-        soup = BeautifulSoup("", "html.parser")
-        fetch_ok = False
-    finally:
-        session.close()
+def parse_html_entries(soup, source, base, allowed):
     entries, seen = [], set()
     for a in soup.select(source.get("article_selector", "a[href]")):
         title = " ".join(a.get_text(" ", strip=True).split())
@@ -112,26 +134,31 @@ def build(source):
         path = urlparse(link).path.lower()
         if path in ("", "/", "/ noticias") or any(x in path for x in ("/tag/", "/categoria/", "/author/", "/search")):
             continue
-        # Skip obvious navigation and utility links; retain legitimate article paths.
-        if len(path.strip("/").split("/")) < 2 and not re.search(r"\d", path):
+        if len(path.strip("/").split("/")) < 2 and not re.search(r"\\d", path):
             continue
         seen.add(link)
         parent = a
         for _ in range(4):
-            if parent.parent: parent = parent.parent
+            if parent.parent:
+                parent = parent.parent
         date_node = a.find("time") or parent.find("time")
         published = parse_date(soup, date_node)
         desc = " ".join(parent.get_text(" ", strip=True).split())
-        if desc == title: desc = ""
+        if desc == title:
+            desc = ""
         entries.append((published, title, link, desc[:1200]))
-    entries.sort(key=lambda e: (e[0] is not None, e[0] or datetime.min.replace(tzinfo=timezone.utc)), reverse=True)
-    entries = entries[:60]
-    if not entries:
-        print(f"[WARN] {source['name']}: no article links found", file=sys.stderr)
+    entries.sort(
+        key=lambda e: (e[0] is not None, e[0] or datetime.min.replace(tzinfo=timezone.utc)),
+        reverse=True,
+    )
+    return entries[:60]
+
+def write_output(source, entries):
+    site_url = source.get("site_url") or source["base_url"]
     rss = ET.Element("rss", version="2.0")
     channel = ET.SubElement(rss, "channel")
     ET.SubElement(channel, "title").text = source["name"]
-    ET.SubElement(channel, "link").text = base
+    ET.SubElement(channel, "link").text = site_url
     ET.SubElement(channel, "description").text = f"Feed gerado pelo meuFeed para {source['name']}"
     ET.SubElement(channel, "lastBuildDate").text = format_datetime(datetime.now(timezone.utc))
     for published, title, link, desc in entries:
@@ -139,19 +166,71 @@ def build(source):
         ET.SubElement(item, "title").text = title
         ET.SubElement(item, "link").text = link
         ET.SubElement(item, "guid", isPermaLink="true").text = link
-        if desc: ET.SubElement(item, "description").text = desc
-        if published: ET.SubElement(item, "pubDate").text = format_datetime(published)
+        if desc:
+            ET.SubElement(item, "description").text = desc
+        if published:
+            ET.SubElement(item, "pubDate").text = format_datetime(published)
     OUT.mkdir(parents=True, exist_ok=True)
     path = OUT / source["output"]
     ET.ElementTree(rss).write(path, encoding="utf-8", xml_declaration=True)
     print(f"[OK] {source['name']}: {len(entries)} items -> {path}")
+
+def build(source):
+    base = source["base_url"]
+    allowed = {str(host).lower() for host in source.get("allowed_hosts", [urlparse(base).hostname])}
+    fetch_ok = True
+    session = requests.Session()
+    session.headers.update({
+        "User-Agent": UA,
+        "Accept": "application/rss+xml, application/atom+xml, application/xml, text/xml, text/html;q=0.9, */*;q=0.8",
+        "Accept-Language": "pt-BR,pt;q=0.9,en;q=0.8",
+    })
+    try:
+        response = session.get(base, timeout=(10, 30))
+        print(
+            f"[INFO] {source['name']}: HTTP {response.status_code}; "
+            f"content-type={response.headers.get('Content-Type', '(missing)')}; "
+            f"server={response.headers.get('Server', '(missing)')}",
+            file=sys.stderr,
+        )
+        response.raise_for_status()
+        if source.get("mode", "html").lower() in {"rss", "atom", "xml"}:
+            entries = parse_native_feed(response.content, source, response.url, allowed)
+        else:
+            soup = BeautifulSoup(response.text, "html.parser")
+            entries = parse_html_entries(soup, source, base, allowed)
+        if not entries:
+            print(f"[WARN] {source['name']}: no article links found", file=sys.stderr)
+    except requests.exceptions.SSLError as exc:
+        print(f"[ERROR] {source['name']}: SSL/TLS failure: {type(exc).__name__}: {exc}", file=sys.stderr)
+        entries, fetch_ok = [], False
+    except requests.exceptions.HTTPError as exc:
+        response = getattr(exc, "response", None)
+        status = response.status_code if response is not None else "(unknown)"
+        headers = response.headers if response is not None else {}
+        body = response.text if response is not None else ""
+        excerpt = " ".join(BeautifulSoup(body, "html.parser").get_text(" ", strip=True).split())[:800]
+        print(
+            f"[ERROR] {source['name']}: HTTP {status}; "
+            f"content-type={headers.get('Content-Type', '(missing)')}; "
+            f"server={headers.get('Server', '(missing)')}; response excerpt={excerpt!r}",
+            file=sys.stderr,
+        )
+        entries, fetch_ok = [], False
+    except (requests.RequestException, ValueError) as exc:
+        print(f"[ERROR] {source['name']}: {type(exc).__name__}: {exc}", file=sys.stderr)
+        entries, fetch_ok = [], False
+    finally:
+        session.close()
+    write_output(source, entries)
     return fetch_ok
 
 def main():
     cfg = yaml.safe_load((ROOT / "sources.yaml").read_text(encoding="utf-8")) or {}
     failed = 0
     for source in cfg.get("sources", []):
-        if not build(source): failed += 1
+        if not build(source):
+            failed += 1
     if failed:
         print(f"[WARN] {failed} source(s) failed to fetch; valid RSS files were still emitted.")
 
