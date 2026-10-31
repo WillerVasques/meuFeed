@@ -50,13 +50,15 @@ def parse_date(soup, node):
 def build(source):
     base = source["base_url"]
     allowed = set(source.get("allowed_hosts", [urlparse(base).hostname]))
+    fetch_ok = True
     try:
         response = requests.get(base, timeout=25, headers={"User-Agent": UA})
         response.raise_for_status()
+        soup = BeautifulSoup(response.text, "html.parser")
     except requests.RequestException as exc:
-        print(f"[WARN] {source['name']}: fetch failed: {exc}", file=sys.stderr)
-        return False
-    soup = BeautifulSoup(response.text, "html.parser")
+        print(f"[WARN] {source['name']}: fetch failed: {exc}; emitting an empty valid RSS", file=sys.stderr)
+        soup = BeautifulSoup("", "html.parser")
+        fetch_ok = False
     entries, seen = [], set()
     for a in soup.select(source.get("article_selector", "a[href]")):
         title = " ".join(a.get_text(" ", strip=True).split())
@@ -102,7 +104,7 @@ def build(source):
     path = OUT / source["output"]
     ET.ElementTree(rss).write(path, encoding="utf-8", xml_declaration=True)
     print(f"[OK] {source['name']}: {len(entries)} items -> {path}")
-    return True
+    return fetch_ok
 
 def main():
     cfg = yaml.safe_load((ROOT / "sources.yaml").read_text(encoding="utf-8")) or {}
