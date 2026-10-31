@@ -6,7 +6,7 @@ sources:
   # `href`: Uma URL que retorna conteúdo nos formatos RSS 1.0, RSS 2.0 ou Atom. (obrigatório para cada fonte)
   - href: https://verdesmares.com.br
   - href: https://opovo.com.br
-  - href: https://www.contabeis.com.br/
+  - href: https://www.contabeis.com.br/rss/
   - href: https://jornalcontabil.com.br/
   - href: https://jcconcursos.com.br/
   - href: https://www.pciconcursos.com.br/
