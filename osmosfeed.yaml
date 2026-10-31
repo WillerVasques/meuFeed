@@ -1,16 +1,18 @@
 # `cacheUrl`: Uma URL que contém a saída da compilação anterior. (obrigatório)
-cacheUrl: https://willervasques.github.io/IntelligenceTube/cache.json
+cacheUrl: https://willervasques.github.io/meuFeed/cache.json
 
 # `sources`: Uma lista de assinaturas RSS. (obrigatório)
 sources:
   # `href`: Uma URL que retorna conteúdo nos formatos RSS 1.0, RSS 2.0 ou Atom. (obrigatório para cada fonte)
-  - href: https://www.youtube.com/feeds/videos.xml?channel_id=UCpOSu4F9cqSjh1OgbmOT5cQ
-  - href: https://www.youtube.com/feeds/videos.xml?channel_id=UCnpitTIp52GpOC8LaNnWefg
-  - href: https://www.youtube.com/feeds/videos.xml?channel_id=UCVngl-zszbWdMcRht9GVrnQ
-
+  - href: https://verdesmares.com.br
+  - href: https://opovo.com.br
+  - href: https://www.contabeis.com.br/
+  - href: https://jornalcontabil.com.br/
+  - href: https://jcconcursos.com.br/
+  - href: https://www.pciconcursos.com.br/
 
 # `siteTitle`: Título a ser usado na aba do navegador e na saída do feed legível por máquina. (opcional)
-siteTitle: "YouTube Intelligence Dashboard"
+siteTitle: "meu Feed Dashboard"
 
 # `timezone`: Especifique seu fuso horário local para que o servidor possa agrupar o conteúdo por dia da semana
 # Encontre o seu na coluna "Nome do banco de dados TZ" desta página: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List
@@ -18,4 +20,4 @@ siteTitle: "YouTube Intelligence Dashboard"
 timezone: America/Fortaleza
 
 # `cacheMaxDays` Número máximo de dias para manter o conteúdo do feed em cache. Um valor muito alto pode aumentar o tempo de carregamento inicial do site. (opcional)
-cacheMaxDays: 30
+cacheMaxDays: 5
