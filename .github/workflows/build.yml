@@ -1,43 +1,51 @@
-name: Build Feed
+name: Build and publish feeds
 
 on:
   schedule:
-    - cron: '0 */6 * * *'
+    - cron: "17 */6 * * *"
   workflow_dispatch:
   push:
     branches: [main]
 
+permissions:
+  contents: write
+
+concurrency:
+  group: feed-build
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    
     steps:
-      - uses: actions/checkout@v3
-      
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
         with:
-          node-version: '18'
-      
-      - name: Install all dependencies
-        run: npm install
-      
-      - name: Build CLI
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install scraper dependencies
+        run: pip install -r requirements.txt
+      - name: Generate source RSS feeds
+        run: python scripts/generate_html_feeds.py
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install Node dependencies
+        run: npm ci
+      - name: Build Osmosfeed CLI
         run: npm run build -w packages/cli
-      
-      - name: Generate feeds
+      - name: Generate dashboard
         run: npx osmosfeed
-      
-      - name: Commit and push
+      - name: Commit generated site
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          
-          if [[ $(git status --porcelain docs/) ]]; then
+          if [[ -n "$(git status --porcelain docs/)" ]]; then
             git add docs/
-            git commit -m "chore: update feeds"
+            git commit -m "chore: update generated feeds"
             git push
           else
-            echo "No changes to commit"
+            echo "No generated changes"
           fi
