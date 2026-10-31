@@ -1,7 +1,8 @@
 sources:
   - name: Verdes Mares
-    base_url: https://www.diariodonordeste.verdesmares.com.br
-    article_selector: "a[href]"
+    mode: rss
+    base_url: https://diariodonordeste.verdesmares.com.br/servicos/rss
+    site_url: https://diariodonordeste.verdesmares.com.br
     allowed_hosts: ["diariodonordeste.verdesmares.com.br", "www.diariodonordeste.verdesmares.com.br"]
     output: verdesmares.xml
   - name: O Povo
@@ -10,9 +11,10 @@ sources:
     allowed_hosts: ["opovo.com.br", "www.opovo.com.br"]
     output: opovo.xml
   - name: Jornal Contábil
-    base_url: https://www.jornalcontabil.com.br/feed/
-    article_selector: "a[href]"
-    allowed_hosts: ["jornalcontabil.com.br/feed/", "www.jornalcontabil.com.br/feed/"]
+    mode: rss
+    base_url: https://jornalcontabil.com.br/feed/
+    site_url: https://jornalcontabil.com.br
+    allowed_hosts: ["jornalcontabil.com.br", "www.jornalcontabil.com.br"]
     output: jornalcontabil.xml
   - name: JC Concursos
     base_url: https://jcconcursos.com.br
