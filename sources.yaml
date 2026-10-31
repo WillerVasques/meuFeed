@@ -19,14 +19,12 @@ sources:
     output: jornalcontabil.xml
   - name: JC Concursos
     mode: rss
-    enrich_articles: true
     base_url: https://rss.app/feeds/ClmROHYkARmlYgDs.xml
     site_url: https://jcconcursos.com.br
     allowed_hosts: ["jcconcursos.com.br", "www.jcconcursos.com.br"]
     output: jcconcursos.xml
   - name: PCI Concursos
     mode: rss
-    enrich_articles: true
     base_url: https://rss.app/feeds/2xf6vJ4BrZx2s5HG.xml
     site_url: https://www.pciconcursos.com.br
     allowed_hosts: ["pciconcursos.com.br", "www.pciconcursos.com.br"]
