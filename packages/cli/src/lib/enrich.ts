@@ -77,7 +77,9 @@ async function enrichInternal(enrichInput: EnrichInput): Promise<EnrichedSource 
   const feed = normalizeFeed(rawFeed, source.href);
   const now = Date.now();
   const cachedArticles = cachedSource?.articles ?? [];
-  const cachedByLink = new Map(cachedArticles.map((article) => [article.link, article]));
+  const cachedByLink = new Map<string, EnrichedArticle>(
+    cachedArticles.map((article) => [article.link, article] as const)
+  );
 
   // Refresh metadata for articles already in cache using the current RSS item.
   // Keep cached enrichment only as fallback when the feed omits a field.
