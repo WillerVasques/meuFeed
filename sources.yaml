@@ -1,7 +1,7 @@
 sources:
   - name: Verdes Mares
     mode: rss
-    base_url: https://diariodonordeste.verdesmares.com.br/servicos/rss
+    base_url: https://diariodonordeste.verdesmares.com.br/cmlink/feed-ultima-hora-7.4842206
     site_url: https://diariodonordeste.verdesmares.com.br
     allowed_hosts: ["diariodonordeste.verdesmares.com.br", "www.diariodonordeste.verdesmares.com.br"]
     output: verdesmares.xml
