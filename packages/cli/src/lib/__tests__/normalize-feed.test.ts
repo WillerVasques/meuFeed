@@ -239,4 +239,31 @@ describe("normalizeFeed", () => {
     const result = normalizeFeed(mockInput, "https://example.com/feed/feed.xml");
     expect(result.items[0].link).toBe(null);
   });
+
+  it("resolves image URL from Media RSS content attributes", () => {
+    const mockInput: Parser.Output<any> = {
+      link: "https://example.com/",
+      feedUrl: "https://example.com/feed.xml",
+      title: "Mock title",
+      items: [{ "media:content": { $: { url: "/asset/media-content.jpg" } } }],
+    };
+    const result = normalizeFeed(mockInput, "https://example.com/feed.xml");
+    expect(result.items[0].imageUrl).toBe("https://example.com/asset/media-content.jpg");
+  });
+
+  it("prefers Media RSS thumbnail, then media content, then image enclosure", () => {
+    const mockInput: Parser.Output<any> = {
+      link: "https://example.com/",
+      feedUrl: "https://example.com/feed.xml",
+      title: "Mock title",
+      items: [{
+        "media:thumbnail": { $: { url: "/asset/thumbnail.jpg" } },
+        "media:content": { $: { url: "/asset/content.jpg" } },
+        enclosure: { type: "image/jpeg", url: "/asset/enclosure.jpg" },
+      }],
+    };
+    const result = normalizeFeed(mockInput, "https://example.com/feed.xml");
+    expect(result.items[0].imageUrl).toBe("https://example.com/asset/thumbnail.jpg");
+  });
+
 });
