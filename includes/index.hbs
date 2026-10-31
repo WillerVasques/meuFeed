@@ -85,7 +85,30 @@
       .article-expander[open] .article-expander__title { color: #8f3f71 !important; }
       .article-summary-link { color: #504945 !important; text-decoration: none !important; }
       .article-summary-link:hover { color: #282828 !important; }
-      .article-summary-box-inner { border-left-color: #bdae93 !important; }
+      .article-summary-box-inner {
+        border-left: 0 !important;
+        padding-left: 0 !important;
+        display: grid !important;
+        grid-template-columns: 180px minmax(0, 1fr) !important;
+        align-items: start !important;
+        gap: 16px !important;
+      }
+      .article-summary-box-inner .media-object__media {
+        grid-area: auto !important;
+        width: 180px !important;
+        height: 112px !important;
+        min-width: 180px !important;
+        aspect-ratio: 16 / 10 !important;
+        object-fit: cover !important;
+        margin: 0 !important;
+      }
+      .article-summary-box-inner .media-object__text {
+        grid-area: auto !important;
+        min-width: 0 !important;
+      }
+      .article-expander__title { cursor: pointer !important; }
+      .article-expander { border-bottom: 1px solid #d5c4a1 !important; }
+      .article-expander:last-child { border-bottom: 0 !important; }
       .article-reading-time { color: #665c54 !important; }
       .article-image { border: 1px solid #bdae93 !important; border-radius: 6px !important; }
       footer { color: #bdae93 !important; }
@@ -118,7 +141,7 @@
                 <section class="articles-per-source">
                   {{#each articles}}
                     <article>
-                      <details class="article-expander" data-action="toggle-native-accordion" data-accordion-key="{{id}}" open>
+                      <details class="article-expander" data-action="toggle-native-accordion" data-accordion-key="{{id}}">
                         <summary class="article-expander__title">{{title}}</summary>
                         <a class="article-summary-link article-summary-box-outer" href="{{link}}">
                           <div class="article-summary-box-inner media-object">
