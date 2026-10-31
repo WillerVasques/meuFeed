@@ -51,14 +51,55 @@ def build(source):
     base = source["base_url"]
     allowed = set(source.get("allowed_hosts", [urlparse(base).hostname]))
     fetch_ok = True
+    session = requests.Session()
+    session.headers.update({
+        "User-Agent": UA,
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Language": "pt-BR,pt;q=0.9,en;q=0.8",
+    })
     try:
-        response = requests.get(base, timeout=25, headers={"User-Agent": UA})
+        response = session.get(base, timeout=(10, 30))
+        print(
+            f"[INFO] {source['name']}: HTTP {response.status_code}; "
+            f"content-type={response.headers.get('Content-Type', '(missing)')}; "
+            f"server={response.headers.get('Server', '(missing)')}",
+            file=sys.stderr,
+        )
         response.raise_for_status()
         soup = BeautifulSoup(response.text, "html.parser")
-    except requests.RequestException as exc:
-        print(f"[WARN] {source['name']}: fetch failed: {exc}; emitting an empty valid RSS", file=sys.stderr)
+    except requests.exceptions.SSLError as exc:
+        # Preserve the full TLS exception for diagnosis in the Actions log.
+        print(
+            f"[ERROR] {source['name']}: SSL/TLS failure: {type(exc).__name__}: {exc}",
+            file=sys.stderr,
+        )
         soup = BeautifulSoup("", "html.parser")
         fetch_ok = False
+    except requests.exceptions.HTTPError as exc:
+        response = getattr(exc, "response", None)
+        status = response.status_code if response is not None else "(unknown)"
+        headers = response.headers if response is not None else {}
+        body = response.text if response is not None else ""
+        # Log only a bounded, text-only excerpt; avoid dumping large pages or cookies.
+        excerpt = " ".join(BeautifulSoup(body, "html.parser").get_text(" ", strip=True).split())[:800]
+        print(
+            f"[ERROR] {source['name']}: HTTP {status}; "
+            f"content-type={headers.get('Content-Type', '(missing)')}; "
+            f"server={headers.get('Server', '(missing)')}; "
+            f"response excerpt={excerpt!r}",
+            file=sys.stderr,
+        )
+        soup = BeautifulSoup("", "html.parser")
+        fetch_ok = False
+    except requests.RequestException as exc:
+        print(
+            f"[ERROR] {source['name']}: request failure: {type(exc).__name__}: {exc}",
+            file=sys.stderr,
+        )
+        soup = BeautifulSoup("", "html.parser")
+        fetch_ok = False
+    finally:
+        session.close()
     entries, seen = [], set()
     for a in soup.select(source.get("article_selector", "a[href]")):
         title = " ".join(a.get_text(" ", strip=True).split())
