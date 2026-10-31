@@ -66,7 +66,68 @@ def parse_feed_date(value):
         except (AttributeError, TypeError, ValueError):
             return None
 
-def parse_native_feed(content, source, feed_url, allowed):
+def image_from_item(node, feed_url):
+    """Obtém imagem por enclosure, Media RSS ou imagem embutida na descrição."""
+    for element in node.iter():
+        name = local_name(element.tag)
+        raw = element.attrib.get("url") or element.attrib.get("href")
+        if raw and name in {"content", "thumbnail", "enclosure"}:
+            url = urljoin(feed_url, raw.strip())
+            if urlparse(url).scheme in {"http", "https"}:
+                return url
+    for element in node.iter():
+        if local_name(element.tag) in {"description", "summary", "encoded", "content"} and element.text:
+            soup = BeautifulSoup(unescape(element.text), "html.parser")
+            img = soup.find("img", src=True)
+            if img:
+                url = urljoin(feed_url, img["src"].strip())
+                if urlparse(url).scheme in {"http", "https"}:
+                    return url
+    return ""
+
+
+def article_metadata(session, url):
+    """Prioriza descrição e imagem declaradas pela própria página da notícia."""
+    try:
+        response = session.get(url, timeout=(8, 18))
+        response.raise_for_status()
+        soup = BeautifulSoup(response.text, "html.parser")
+
+        def meta(*selectors):
+            for selector in selectors:
+                tag = soup.select_one(selector)
+                if tag:
+                    value = tag.get("content") or tag.get("href")
+                    if value and value.strip():
+                        return value.strip()
+            return ""
+
+        description = meta(
+            'meta[property="og:description"]',
+            'meta[name="description"]',
+            'meta[name="twitter:description"]',
+        )
+        image = meta(
+            'meta[property="og:image"]',
+            'meta[name="twitter:image"]',
+            'meta[property="og:image:secure_url"]',
+        )
+        if not description:
+            lead = soup.select_one("article p, .article-content p, .post-content p, main p")
+            if lead:
+                description = lead.get_text(" ", strip=True)
+        if image:
+            image = urljoin(response.url, image)
+            if urlparse(image).scheme not in {"http", "https"}:
+                image = ""
+        description = " ".join(BeautifulSoup(description, "html.parser").get_text(" ", strip=True).split())
+        return description[:1200], image
+    except requests.RequestException as exc:
+        print(f"[WARN] Não foi possível enriquecer notícia {url}: {type(exc).__name__}: {exc}", file=sys.stderr)
+        return "", ""
+
+
+def parse_native_feed(content, source, feed_url, allowed, session=None):
     try:
         root = ET.fromstring(content)
     except ET.ParseError as exc:
@@ -85,9 +146,16 @@ def parse_native_feed(content, source, feed_url, allowed):
         seen.add(link)
         description = child_text(node, {"description", "summary", "encoded", "content"})
         description = " ".join(BeautifulSoup(unescape(description), "html.parser").get_text(" ", strip=True).split())
+        image = image_from_item(node, feed_url)
+        if source.get("enrich_articles") and session:
+            page_description, page_image = article_metadata(session, link)
+            if page_description:
+                description = page_description
+            if page_image:
+                image = page_image
         date_value = child_text(node, {"pubdate", "published", "updated", "date"})
         published = parse_feed_date(date_value)
-        entries.append((published, title, link, description[:1200]))
+        entries.append((published, title, link, description[:1200], image))
 
     entries.sort(
         key=lambda e: (e[0] is not None, e[0] or datetime.min.replace(tzinfo=timezone.utc)),
@@ -146,7 +214,7 @@ def parse_html_entries(soup, source, base, allowed):
         desc = " ".join(parent.get_text(" ", strip=True).split())
         if desc == title:
             desc = ""
-        entries.append((published, title, link, desc[:1200]))
+        entries.append((published, title, link, desc[:1200], ""))
     entries.sort(
         key=lambda e: (e[0] is not None, e[0] or datetime.min.replace(tzinfo=timezone.utc)),
         reverse=True,
@@ -161,13 +229,16 @@ def write_output(source, entries):
     ET.SubElement(channel, "link").text = site_url
     ET.SubElement(channel, "description").text = f"Feed gerado pelo meuFeed para {source['name']}"
     ET.SubElement(channel, "lastBuildDate").text = format_datetime(datetime.now(timezone.utc))
-    for published, title, link, desc in entries:
+    for published, title, link, desc, image in entries:
         item = ET.SubElement(channel, "item")
         ET.SubElement(item, "title").text = title
         ET.SubElement(item, "link").text = link
         ET.SubElement(item, "guid", isPermaLink="true").text = link
         if desc:
             ET.SubElement(item, "description").text = desc
+        if image:
+            ET.SubElement(item, "{http://search.yahoo.com/mrss/}content", {"url": image, "medium": "image"})
+            ET.SubElement(item, "enclosure", {"url": image, "type": "image/jpeg"})
         if published:
             ET.SubElement(item, "pubDate").text = format_datetime(published)
     OUT.mkdir(parents=True, exist_ok=True)
@@ -195,7 +266,7 @@ def build(source):
         )
         response.raise_for_status()
         if source.get("mode", "html").lower() in {"rss", "atom", "xml"}:
-            entries = parse_native_feed(response.content, source, response.url, allowed)
+            entries = parse_native_feed(response.content, source, response.url, allowed, session=session)
         else:
             soup = BeautifulSoup(response.text, "html.parser")
             entries = parse_html_entries(soup, source, base, allowed)
