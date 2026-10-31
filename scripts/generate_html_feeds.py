@@ -111,8 +111,8 @@ def main():
     failed = 0
     for source in cfg.get("sources", []):
         if not build(source): failed += 1
-    if failed == len(cfg.get("sources", [])) and failed:
-        raise SystemExit("All configured source fetches failed")
+    if failed:
+        print(f"[WARN] {failed} source(s) failed to fetch; valid RSS files were still emitted.")
 
 if __name__ == "__main__":
     main()
