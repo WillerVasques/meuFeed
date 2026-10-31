@@ -63,14 +63,18 @@ function getMediaUrl(value: unknown): string | null {
   if (value && typeof value === "object") {
     const media = value as { url?: unknown; href?: unknown; $?: { url?: unknown; href?: unknown } };
     return (
-      getNonEmptyStringOrNull(media.url) ??
-      getNonEmptyStringOrNull(media.href) ??
-      getNonEmptyStringOrNull(media.$?.url) ??
-      getNonEmptyStringOrNull(media.$?.href)
+      asNonEmptyString(media.url) ??
+      asNonEmptyString(media.href) ??
+      asNonEmptyString(media.$?.url) ??
+      asNonEmptyString(media.$?.href)
     );
   }
 
   return null;
+}
+
+function asNonEmptyString(value: unknown): string | null {
+  return typeof value === "string" ? getNonEmptyStringOrNull(value) : null;
 }
 
 function getItunesFields(itunesItem: CustomFields) {
