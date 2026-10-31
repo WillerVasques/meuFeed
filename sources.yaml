@@ -1,2 +1,26 @@
-# Sources
-sources: []
+sources:
+  - name: Verdes Mares
+    base_url: https://www.verdesmares.com.br
+    article_selector: "a[href]"
+    allowed_hosts: ["verdesmares.com.br", "www.verdesmares.com.br"]
+    output: verdesmares.xml
+  - name: O Povo
+    base_url: https://www.opovo.com.br
+    article_selector: "a[href]"
+    allowed_hosts: ["opovo.com.br", "www.opovo.com.br"]
+    output: opovo.xml
+  - name: Jornal Contábil
+    base_url: https://www.jornalcontabil.com.br
+    article_selector: "a[href]"
+    allowed_hosts: ["jornalcontabil.com.br", "www.jornalcontabil.com.br"]
+    output: jornalcontabil.xml
+  - name: JC Concursos
+    base_url: https://jcconcursos.com.br
+    article_selector: "a[href]"
+    allowed_hosts: ["jcconcursos.com.br", "www.jcconcursos.com.br"]
+    output: jcconcursos.xml
+  - name: PCI Concursos
+    base_url: https://www.pciconcursos.com.br
+    article_selector: "a[href]"
+    allowed_hosts: ["pciconcursos.com.br", "www.pciconcursos.com.br"]
+    output: pciconcursos.xml
