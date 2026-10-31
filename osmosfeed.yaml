@@ -3,8 +3,9 @@ sources:
   - href: http://127.0.0.1:8765/generated-feeds/verdesmares.xml
   - href: http://127.0.0.1:8765/generated-feeds/opovo.xml
   - href: http://127.0.0.1:8765/generated-feeds/jornalcontabil.xml
+  - href: http://127.0.0.1:8765/generated-feeds/contabeis.xml
   - href: http://127.0.0.1:8765/generated-feeds/jcconcursos.xml
   - href: http://127.0.0.1:8765/generated-feeds/pciconcursos.xml
-siteTitle: "meu Feed Dashboard"
+siteTitle: "meuFeed | Painel de notícias"
 timezone: America/Fortaleza
 cacheMaxDays: 5

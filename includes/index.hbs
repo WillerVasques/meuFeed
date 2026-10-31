@@ -1,131 +1,180 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
   <head>
     <title>{{siteTitle}}</title>
     <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="robots" content="noindex, nofollow" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f4f6f8" />
+    <meta name="robots" content="noindex, nofollow" />
     <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
     <link rel="alternate" type="application/rss+xml" title="{{siteTitle}}" href="{{feedHref}}" />
     <link href="index.css?v1.14.4" rel="stylesheet" />
     <style>
-      /* meuFeed — Gruvbox Light layout overrides (inline to avoid theme injection/cache issues) */
       :root {
         color-scheme: light;
-        --base00: #fbf1c7;
-        --base01: #ebdbb2;
-        --base02: #d5c4a1;
-        --base03: #bdae93;
-        --base04: #665c54;
-        --base05: #504945;
-        --base06: #3c3836;
-        --base07: #282828;
-        --base08: #9d0006;
-        --base09: #af3a03;
-        --base0A: #b57614;
-        --base0B: #79740e;
-        --base0C: #427b58;
-        --base0D: #076678;
-        --base0E: #8f3f71;
-        --base0F: #d65d0e;
-        --body-color: var(--base04);
-        --body-bg: var(--base01);
-        --body-padding: 28px clamp(14px, 3vw, 40px);
-        --body-stack-gap: 28px;
-        --card-bg: var(--base00);
-        --card-border-color: var(--base02);
-        --card-padding: 18px;
-        --card-radius: 8px;
-        --card-shadow: none;
-        --daily-heading-color: var(--base03);
-        --daily-heading-hover-color: var(--base04);
-        --article-title-color: var(--base0E);
-        --article-title-expanded-color: var(--base0E);
-        --article-summary-color: var(--base05);
-        --article-summary-hover-color: var(--base07);
-        --source-name-color: var(--base09);
-        --source-name-hover-color: var(--base07);
-        --source-link-color: var(--base04);
-        --source-link-hover-color: var(--base07);
-        --footer-color: var(--base03);
-        --footer-link-text: var(--base04);
-        --footer-link-hover-color: var(--base07);
+        --ink: #172b3a;
+        --muted: #71808d;
+        --line: #e4e9ed;
+        --paper: #ffffff;
+        --canvas: #f4f6f8;
+        --accent: #087f72;
+        --accent-soft: #e5f3f0;
+        --body-color: var(--ink);
+        --body-bg: var(--canvas);
+        --body-padding: 0 0 40px;
+        --body-stack-gap: 30px;
+        --card-bg: var(--paper);
+        --card-border-color: var(--line);
+        --card-padding: 20px;
+        --card-radius: 14px;
+        --card-shadow: 0 5px 20px rgba(23,43,58,.045);
+        --daily-heading-color: var(--ink);
+        --daily-heading-hover-color: var(--accent);
+        --article-title-color: #203849;
+        --article-title-expanded-color: var(--accent);
+        --article-summary-color: #52616c;
+        --article-summary-hover-color: var(--ink);
+        --source-name-color: var(--ink);
+        --source-name-hover-color: var(--accent);
+        --source-link-color: var(--accent);
+        --source-link-hover-color: #075e55;
+        --footer-color: var(--muted);
+        --footer-link-text: var(--accent);
+        --footer-link-hover-color: var(--ink);
       }
-      html { background: #ebdbb2 !important; color-scheme: light !important; }
+      * { box-sizing: border-box; }
+      html { background: var(--canvas) !important; }
       body {
-        background: #ebdbb2 !important;
-        color: #665c54 !important;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
-        line-height: 1.45 !important;
-        padding: 28px clamp(14px, 3vw, 40px) !important;
-        gap: 28px !important;
+        max-width: 1440px !important;
+        margin: 0 auto !important;
+        padding: 0 34px 42px !important;
+        gap: 30px !important;
+        background: var(--canvas) !important;
+        color: var(--ink) !important;
+        font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+        line-height: 1.55 !important;
       }
-      .daily-heading { font-size: clamp(2.2rem, 3vw, 3.6rem) !important; margin: 0 0 8px !important; }
-      .daily-heading-toggle { color: #bdae93 !important; text-transform: lowercase !important; padding: 0 16px !important; gap: 14px !important; }
-      .daily-heading-toggle:hover { color: #665c54 !important; }
-      .daily-heading-toggle__date { font-size: 1.7rem !important; }
+      .site-header {
+        margin: 0 -34px 4px;
+        padding: 34px max(34px, calc((100vw - 1372px)/2));
+        background: #172b3a;
+        color: #fff;
+        border-bottom: 4px solid var(--accent);
+      }
+      .brand-line { display:flex; align-items:center; gap:14px; }
+      .brand-mark {
+        display:grid; place-items:center; width:42px; height:42px;
+        border-radius:12px; background:var(--accent); color:#fff;
+        font-size:20px; font-weight:800; letter-spacing:-1px;
+      }
+      .brand-name { margin:0; color:#fff; font-size:clamp(1.8rem,3vw,2.35rem); font-weight:750; letter-spacing:-.055em; }
+      .brand-subtitle { margin:3px 0 0; color:#b9c8d1; font-size:.95rem; }
+      .header-meta { margin:20px 0 0; color:#d3dde3; font-size:.82rem; letter-spacing:.08em; text-transform:uppercase; }
+      .daily-content { margin: 0 0 34px; }
+      .daily-heading { margin:0 0 16px !important; font-size:1rem !important; }
+      .daily-heading-toggle {
+        padding:0 !important; display:flex !important; align-items:baseline !important;
+        gap:12px !important; color:var(--ink) !important; text-transform:none !important;
+      }
+      .daily-heading-toggle:hover { color:var(--accent) !important; }
+      .daily-heading-toggle__weekday { font-size:1.35rem !important; font-weight:750 !important; letter-spacing:-.035em; }
+      .daily-heading-toggle__date { color:var(--muted); font-size:.95rem !important; font-weight:500; }
       .sources.card {
-        background: #d5c4a1 !important;
-        border: 1px solid #d5c4a1 !important;
-        border-radius: 8px !important;
-        overflow: hidden !important;
+        display:grid !important; grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+        gap:16px !important; margin:0 !important; padding:0 !important;
+        list-style:none !important; background:transparent !important;
+        border:0 !important; overflow:visible !important;
       }
       .card__section {
-        background: #fbf1c7 !important;
-        padding: 16px !important;
+        min-width:0; padding:20px !important; background:var(--paper) !important;
+        border:1px solid var(--line) !important; border-radius:14px !important;
+        box-shadow:var(--card-shadow) !important;
       }
-      .source-heading { margin-bottom: 8px !important; }
-      .source-heading__name { color: #af3a03 !important; }
-      .source-heading__name:hover { color: #282828 !important; }
-      .source-heading__link { color: #665c54 !important; text-decoration: none !important; }
-      .source-heading__link:hover { color: #282828 !important; text-decoration: underline !important; }
-      .article-expander { padding: 4px 0 !important; }
-      .article-expander__title { color: #8f3f71 !important; font-weight: 600 !important; }
-      .article-expander[open] .article-expander__title { color: #8f3f71 !important; }
-      .article-summary-link { color: #504945 !important; text-decoration: none !important; }
-      .article-summary-link:hover { color: #282828 !important; }
+      .source-heading {
+        display:flex !important; align-items:center !important; justify-content:space-between !important;
+        gap:12px; margin:0 0 12px !important; padding-bottom:12px;
+        border-bottom:1px solid var(--line);
+      }
+      .source-heading__name {
+        color:var(--ink) !important; font-size:1.08rem !important;
+        font-weight:750 !important; letter-spacing:-.02em; text-align:left;
+      }
+      .source-heading__name:hover { color:var(--accent) !important; }
+      .source-heading__link {
+        flex:none; padding:5px 10px; border-radius:20px;
+        background:var(--accent-soft); color:var(--accent) !important;
+        font-size:.75rem; font-weight:700; text-decoration:none !important;
+      }
+      .source-heading__link:hover { background:var(--accent); color:#fff !important; }
+      .articles-per-source { min-width:0; }
+      .article-expander {
+        padding:10px 0 !important; border-bottom:1px solid #edf0f2 !important;
+      }
+      .article-expander:last-child { border-bottom:0 !important; }
+      .article-expander__title {
+        color:#253d4d !important; font-size:.94rem !important;
+        line-height:1.45 !important; font-weight:650 !important;
+        cursor:pointer !important; transition:color .15s ease;
+      }
+      .article-expander__title:hover,
+      .article-expander[open] .article-expander__title { color:var(--accent) !important; }
+      .article-summary-link {
+        display:block; margin-top:12px; color:var(--article-summary-color) !important;
+        font-size:.88rem; line-height:1.6; text-decoration:none !important;
+      }
+      .article-summary-link:hover { color:var(--ink) !important; }
       .article-summary-box-inner {
-        border-left: 0 !important;
-        padding-left: 0 !important;
-        display: grid !important;
-        grid-template-columns: 180px minmax(0, 1fr) !important;
-        align-items: start !important;
-        gap: 16px !important;
+        display:grid !important; grid-template-columns:150px minmax(0,1fr) !important;
+        align-items:start !important; gap:14px !important;
+        border:0 !important; padding:0 !important;
       }
       .article-summary-box-inner .media-object__media {
-        grid-area: auto !important;
-        width: 180px !important;
-        height: 112px !important;
-        min-width: 180px !important;
-        aspect-ratio: 16 / 10 !important;
-        object-fit: cover !important;
-        margin: 0 !important;
+        grid-area:auto !important; width:150px !important; height:96px !important;
+        min-width:0 !important; aspect-ratio:16/10 !important; object-fit:cover !important;
+        margin:0 !important; border:1px solid var(--line) !important;
+        border-radius:9px !important;
       }
-      .article-summary-box-inner .media-object__text {
-        grid-area: auto !important;
-        min-width: 0 !important;
+      .article-summary-box-inner .media-object__text { grid-area:auto !important; min-width:0 !important; }
+      .article-reading-time { color:var(--muted) !important; white-space:nowrap; font-size:.78rem; }
+      footer {
+        margin-top:12px; padding:18px 0 0; border-top:1px solid var(--line);
+        color:var(--muted) !important; font-size:.8rem;
       }
-      .article-expander__title { cursor: pointer !important; }
-      .article-expander { border-bottom: 1px solid #d5c4a1 !important; }
-      .article-expander:last-child { border-bottom: 0 !important; }
-      .article-reading-time { color: #665c54 !important; }
-      .article-image { border: 1px solid #bdae93 !important; border-radius: 6px !important; }
-      footer { color: #bdae93 !important; }
-      .footer-link { color: #665c54 !important; }
-      @media (max-width: 640px) {
-        body { padding: 16px 10px !important; gap: 20px !important; }
-        .card__section { padding: 12px !important; }
+      .footer-link { color:var(--accent) !important; text-decoration:none; }
+      .footer-link:hover { color:var(--ink) !important; text-decoration:underline; }
+      @media (max-width:900px) {
+        body { padding:0 20px 32px !important; }
+        .site-header { margin:0 -20px 4px; padding:28px 20px; }
+        .sources.card { grid-template-columns:1fr !important; }
+      }
+      @media (max-width:560px) {
+        body { padding:0 12px 26px !important; gap:22px !important; }
+        .site-header { margin:0 -12px 0; padding:24px 16px; }
+        .brand-mark { width:38px; height:38px; }
+        .card__section { padding:15px !important; border-radius:11px !important; }
+        .article-summary-box-inner { grid-template-columns:104px minmax(0,1fr) !important; gap:10px !important; }
+        .article-summary-box-inner .media-object__media { width:104px !important; height:76px !important; }
+        .article-expander__title { font-size:.9rem !important; }
       }
     </style>
     <!-- %before-head-end.html% -->
   </head>
   <body>
+    <header class="site-header">
+      <div class="brand-line">
+        <div class="brand-mark" aria-hidden="true">mF</div>
+        <div>
+          <h1 class="brand-name">meuFeed</h1>
+          <p class="brand-subtitle">Notícias e atualizações em um só lugar.</p>
+        </div>
+      </div>
+      <p class="header-meta">Painel de notícias · Atualização automática</p>
+    </header>
     <!-- %after-body-begin.html% -->
     {{#each dates}}
       <section class="daily-content js-toggle-accordions-scope">
         <h2 class="daily-heading">
-          <button class="daily-heading-toggle" data-action="toggle-accordions" title="Click to toggle the day, Ctrl + click to toggle all.">
+          <button class="daily-heading-toggle" data-action="toggle-accordions" title="Clique para expandir ou recolher as fontes deste dia.">
             <time class="daily-heading-toggle__weekday js-offset-weekday" data-offset-date={{isoOffsetPublishDate}} datetime="{{isoUtcPublishTime}}">{{isoOffsetPublishDate}}</time>
             <time class="daily-heading-toggle__date js-offset-date" data-offset-date={{isoOffsetPublishDate}} datetime="{{isoUtcPublishTime}}"></time>
           </button>
@@ -135,15 +184,15 @@
             <li class="card__section">
               <section class="js-toggle-accordions-scope">
                 <h3 class="source-heading">
-                  <button class="source-heading__name" data-action="toggle-accordions" title="Click to toggle the source, Ctrl + click to toggle all.">{{title}}</button>
-                  <a class="source-heading__link" href="{{siteUrl}}">Open</a>
+                  <button class="source-heading__name" data-action="toggle-accordions" title="Clique para expandir ou recolher esta fonte.">{{title}}</button>
+                  <a class="source-heading__link" href="{{siteUrl}}" target="_blank" rel="noopener">Visitar fonte ↗</a>
                 </h3>
                 <section class="articles-per-source">
                   {{#each articles}}
                     <article>
                       <details class="article-expander" data-action="toggle-native-accordion" data-accordion-key="{{id}}">
                         <summary class="article-expander__title">{{title}}</summary>
-                        <a class="article-summary-link article-summary-box-outer" href="{{link}}">
+                        <a class="article-summary-link article-summary-box-outer" href="{{link}}" target="_blank" rel="noopener">
                           <div class="article-summary-box-inner media-object">
                             {{#if imageUrl}}
                               <img src="{{imageUrl}}" loading="lazy" class="media-object__media article-image" />
