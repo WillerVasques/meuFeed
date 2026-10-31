@@ -1,28 +1,37 @@
 sources:
   - name: Verdes Mares
     mode: rss
-    base_url: https://diariodonordeste.verdesmares.com.br/cmlink/feed-ultima-hora-7.4842206
+    base_url: https://rss.app/feeds/SdDmTNWCgFmyypao.xml
     site_url: https://diariodonordeste.verdesmares.com.br
     allowed_hosts: ["diariodonordeste.verdesmares.com.br", "www.diariodonordeste.verdesmares.com.br"]
     output: verdesmares.xml
   - name: O Povo
-    base_url: https://www.opovo.com.br
-    article_selector: "a[href]"
+    mode: rss
+    base_url: https://rss.app/feeds/25HOP3kbGooL23pE.xml
+    site_url: https://www.opovo.com.br
     allowed_hosts: ["opovo.com.br", "www.opovo.com.br"]
     output: opovo.xml
   - name: Jornal Contábil
     mode: rss
-    base_url: https://jornalcontabil.com.br/feed/
+    base_url: https://rss.app/feeds/Tg5ulUsRLqRcJpCA.xml
     site_url: https://jornalcontabil.com.br
     allowed_hosts: ["jornalcontabil.com.br", "www.jornalcontabil.com.br"]
     output: jornalcontabil.xml
   - name: JC Concursos
-    base_url: https://jcconcursos.com.br
-    article_selector: "a[href]"
+    mode: rss
+    base_url: https://rss.app/feeds/ClmROHYkARmlYgDs.xml
+    site_url: https://jcconcursos.com.br
     allowed_hosts: ["jcconcursos.com.br", "www.jcconcursos.com.br"]
     output: jcconcursos.xml
   - name: PCI Concursos
-    base_url: https://www.pciconcursos.com.br
-    article_selector: "a[href]"
+    mode: rss
+    base_url: https://rss.app/feeds/2xf6vJ4BrZx2s5HG.xml
+    site_url: https://www.pciconcursos.com.br
     allowed_hosts: ["pciconcursos.com.br", "www.pciconcursos.com.br"]
     output: pciconcursos.xml
+  - name: Contábeis
+    mode: rss
+    base_url: https://rss.app/feeds/3Q56mN6af6eS3C8J.xml
+    site_url: https://www.contabeis.com.br
+    allowed_hosts: ["contabeis.com.br", "www.contabeis.com.br"]
+    output: contabeis.xml
