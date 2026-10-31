@@ -29,6 +29,16 @@ jobs:
         run: pip install -r requirements.txt
       - name: Generate source RSS feeds
         run: python scripts/generate_html_feeds.py
+      - name: Serve generated feeds locally for Osmosfeed
+        run: |
+          python -m http.server 8765 --directory docs > /tmp/feed-server.log 2>&1 &
+          for i in {1..20}; do
+            if curl --fail --silent http://127.0.0.1:8765/generated-feeds/opovo.xml >/dev/null; then
+              break
+            fi
+            sleep 1
+          done
+          curl --fail http://127.0.0.1:8765/generated-feeds/opovo.xml >/dev/null
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
