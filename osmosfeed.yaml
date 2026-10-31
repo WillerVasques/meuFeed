@@ -1,23 +1,11 @@
-# `cacheUrl`: Uma URL que contém a saída da compilação anterior. (obrigatório)
 cacheUrl: https://willervasques.github.io/meuFeed/cache.json
-
-# `sources`: Uma lista de assinaturas RSS. (obrigatório)
 sources:
-  # `href`: Uma URL que retorna conteúdo nos formatos RSS 1.0, RSS 2.0 ou Atom. (obrigatório para cada fonte)
-  - href: https://verdesmares.com.br
-  - href: https://opovo.com.br
   - href: https://www.contabeis.com.br/rss/
-  - href: https://jornalcontabil.com.br/
-  - href: https://jcconcursos.com.br/
-  - href: https://www.pciconcursos.com.br/
-
-# `siteTitle`: Título a ser usado na aba do navegador e na saída do feed legível por máquina. (opcional)
+  - href: https://willervasques.github.io/meuFeed/generated-feeds/verdesmares.xml
+  - href: https://willervasques.github.io/meuFeed/generated-feeds/opovo.xml
+  - href: https://willervasques.github.io/meuFeed/generated-feeds/jornalcontabil.xml
+  - href: https://willervasques.github.io/meuFeed/generated-feeds/jcconcursos.xml
+  - href: https://willervasques.github.io/meuFeed/generated-feeds/pciconcursos.xml
 siteTitle: "meu Feed Dashboard"
-
-# `timezone`: Especifique seu fuso horário local para que o servidor possa agrupar o conteúdo por dia da semana
-# Encontre o seu na coluna "Nome do banco de dados TZ" desta página: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List
-# Exemplos: America/Los_Angeles, America/New_York, Asia/Shanghai, Asia/Tokyo
 timezone: America/Fortaleza
-
-# `cacheMaxDays` Número máximo de dias para manter o conteúdo do feed em cache. Um valor muito alto pode aumentar o tempo de carregamento inicial do site. (opcional)
 cacheMaxDays: 5
