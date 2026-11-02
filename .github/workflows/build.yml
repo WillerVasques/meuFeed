@@ -2,7 +2,7 @@ name: Build and publish feeds
 
 on:
   schedule:
-    - cron: "17 */6 * * *"
+    - cron: "0 */3 * * *"
   workflow_dispatch:
   push:
     branches: [main]
@@ -45,6 +45,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
+          cache: npm
       - name: Install Node dependencies
         run: npm ci
       - name: Build Osmosfeed CLI
