@@ -75,7 +75,7 @@
               {{#each articles}}
                 <article>
                   <details class="article-expander" data-action="toggle-native-accordion" data-accordion-key="{{id}}">
-                    <summary class="article-expander__title">{{title}}</summary>
+                    <summary class="article-expander__title"><a href="{{link}}" target="_blank" rel="noopener">{{title}}</a></summary>
                     <a class="article-summary-link article-summary-box-outer" href="{{link}}" target="_blank" rel="noopener">
                       <div class="article-summary-box-inner media-object">
                         {{#if imageUrl}}<img src="{{imageUrl}}" loading="lazy" class="media-object__media article-image" alt="" />{{else}}<img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 200'%3E%3Crect width='320' height='200' rx='8' fill='%23dceafa'/%3E%3Crect x='100' y='45' width='120' height='90' rx='8' fill='none' stroke='%2386a9cc' stroke-width='8'/%3E%3Ccircle cx='190' cy='68' r='10' fill='%2386a9cc'/%3E%3Cpath d='M108 125l38-40 25 24 18-18 23 34z' fill='%2386a9cc'/%3E%3Ctext x='160' y='170' text-anchor='middle' font-family='Arial,sans-serif' font-size='18' fill='%233c6289'%3EImagem indispon%C3%ADvel%3C/text%3E%3C/svg%3E" class="media-object__media missing-image" alt="Imagem não disponível" />{{/if}}
