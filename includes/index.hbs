@@ -1,252 +1,109 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-  <head>
-    <title>{{siteTitle}}</title>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#f4f6f8" />
-    <meta name="robots" content="noindex, nofollow" />
-    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
-    <link rel="alternate" type="application/rss+xml" title="{{siteTitle}}" href="{{feedHref}}" />
-    <link href="index.css?v1.14.4" rel="stylesheet" />
-    <style>
-      :root {
-        color-scheme: light;
-        --ink: #172b3a;
-        --muted: #71808d;
-        --line: #e4e9ed;
-        --paper: #ffffff;
-        --canvas: #f4f6f8;
-        --accent: #087f72;
-        --accent-soft: #e5f3f0;
-        --body-color: var(--ink);
-        --body-bg: var(--canvas);
-        --body-padding: 0 0 40px;
-        --body-stack-gap: 30px;
-        --card-bg: var(--paper);
-        --card-border-color: var(--line);
-        --card-padding: 20px;
-        --card-radius: 14px;
-        --card-shadow: 0 5px 20px rgba(23,43,58,.045);
-        --daily-heading-color: var(--ink);
-        --daily-heading-hover-color: var(--accent);
-        --article-title-color: #203849;
-        --article-title-expanded-color: var(--accent);
-        --article-summary-color: #52616c;
-        --article-summary-hover-color: var(--ink);
-        --source-name-color: var(--ink);
-        --source-name-hover-color: var(--accent);
-        --source-link-color: var(--accent);
-        --source-link-hover-color: #075e55;
-        --footer-color: var(--muted);
-        --footer-link-text: var(--accent);
-        --footer-link-hover-color: var(--ink);
-      }
-      * { box-sizing: border-box; }
-      html { background: var(--canvas) !important; }
-      body {
-        max-width: 1440px !important;
-        margin: 0 auto !important;
-        padding: 0 34px 42px !important;
-        gap: 30px !important;
-        background: var(--canvas) !important;
-        color: var(--ink) !important;
-        font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
-        line-height: 1.55 !important;
-      }
-      .site-header {
-        margin: 0 -34px 4px;
-        padding: 34px max(34px, calc((100vw - 1372px)/2));
-        background: #172b3a;
-        color: #fff;
-        border-bottom: 4px solid var(--accent);
-      }
-      .brand-line { display:flex; align-items:center; gap:14px; }
-      .brand-mark {
-        display:grid; place-items:center; width:42px; height:42px;
-        border-radius:12px; background:var(--accent); color:#fff;
-        font-size:20px; font-weight:800; letter-spacing:-1px;
-      }
-      .brand-name { margin:0; color:#fff; font-size:clamp(1.8rem,3vw,2.35rem); font-weight:750; letter-spacing:-.055em; }
-      .brand-subtitle { margin:3px 0 0; color:#b9c8d1; font-size:.95rem; }
-      .header-meta { margin:20px 0 0; color:#d3dde3; font-size:.82rem; letter-spacing:.08em; text-transform:uppercase; }
-      .daily-content { margin: 0 0 34px; }
-      .daily-heading { margin:0 0 16px !important; font-size:1rem !important; }
-      .daily-heading-toggle {
-        padding:0 !important; display:flex !important; align-items:baseline !important;
-        gap:12px !important; color:var(--ink) !important; text-transform:none !important;
-      }
-      .daily-heading-toggle:hover { color:var(--accent) !important; }
-      .daily-heading-toggle__weekday { font-size:1.35rem !important; font-weight:750 !important; letter-spacing:-.035em; }
-      .daily-heading-toggle__date { color:var(--muted); font-size:.95rem !important; font-weight:500; }
-      .sources.card {
-        display:grid !important; grid-template-columns:repeat(2,minmax(0,1fr)) !important;
-        gap:16px !important; margin:0 !important; padding:0 !important;
-        list-style:none !important; background:transparent !important;
-        border:0 !important; overflow:visible !important;
-      }
-      .card__section {
-        min-width:0; padding:20px !important; background:var(--paper) !important;
-        border:1px solid var(--line) !important; border-radius:14px !important;
-        box-shadow:var(--card-shadow) !important;
-      }
-      .source-heading {
-        display:flex !important; align-items:center !important; justify-content:space-between !important;
-        gap:12px; margin:0 0 12px !important; padding-bottom:12px;
-        border-bottom:1px solid var(--line);
-      }
-      .source-heading__name {
-        color:var(--ink) !important; font-size:1.08rem !important;
-        font-weight:750 !important; letter-spacing:-.02em; text-align:left;
-      }
-      .source-heading__name:hover { color:var(--accent) !important; }
-      .source-heading__link {
-        flex:none; padding:5px 10px; border-radius:20px;
-        background:var(--accent-soft); color:var(--accent) !important;
-        font-size:.75rem; font-weight:700; text-decoration:none !important;
-      }
-      .source-heading__link:hover { background:var(--accent); color:#fff !important; }
-      .articles-per-source { min-width:0; }
-      .article-expander {
-        padding:10px 0 !important; border-bottom:1px solid #edf0f2 !important;
-      }
-      .article-expander:last-child { border-bottom:0 !important; }
-      .article-expander__title {
-        color:#253d4d !important; font-size:.94rem !important;
-        line-height:1.45 !important; font-weight:650 !important;
-        cursor:pointer !important; transition:color .15s ease;
-      }
-      .article-expander__title:hover,
-      .article-expander[open] .article-expander__title { color:var(--accent) !important; }
-      .article-summary-link {
-        display:block; margin-top:12px; color:var(--article-summary-color) !important;
-        font-size:.88rem; line-height:1.6; text-decoration:none !important;
-      }
-      .article-summary-link:hover { color:var(--ink) !important; }
-      .article-summary-box-inner {
-        display:grid !important; grid-template-columns:150px minmax(0,1fr) !important;
-        align-items:start !important; gap:14px !important;
-        border:0 !important; padding:0 !important;
-      }
-      .article-summary-box-inner .media-object__media {
-        grid-area:auto !important; width:150px !important; height:96px !important;
-        min-width:0 !important; aspect-ratio:16/10 !important; object-fit:cover !important;
-        margin:0 !important; border:1px solid var(--line) !important;
-        border-radius:9px !important;
-      }
-      .article-summary-box-inner .media-object__text { grid-area:auto !important; min-width:0 !important; }
-      .article-reading-time { color:var(--muted) !important; white-space:nowrap; font-size:.78rem; }
-      footer {
-        margin-top:12px; padding:18px 0 0; border-top:1px solid var(--line);
-        color:var(--muted) !important; font-size:.8rem;
-      }
-      .footer-link { color:var(--accent) !important; text-decoration:none; }
-      .footer-link:hover { color:var(--ink) !important; text-decoration:underline; }
-      @media (max-width:900px) {
-        body { padding:0 20px 32px !important; }
-        .site-header { margin:0 -20px 4px; padding:28px 20px; }
-        .sources.card { grid-template-columns:1fr !important; }
-      }
-      @media (max-width:560px) {
-        body { padding:0 12px 26px !important; gap:22px !important; }
-        .site-header { margin:0 -12px 0; padding:24px 16px; }
-        .brand-mark { width:38px; height:38px; }
-        .card__section { padding:15px !important; border-radius:11px !important; }
-        .article-summary-box-inner { grid-template-columns:104px minmax(0,1fr) !important; gap:10px !important; }
-        .article-summary-box-inner .media-object__media { width:104px !important; height:76px !important; }
-        .article-expander__title { font-size:.9rem !important; }
-      }
-    </style>
-    <!-- %before-head-end.html% -->
-  </head>
-  <body>
-    <header class="site-header">
-      <div class="brand-line">
-        <div class="brand-mark" aria-hidden="true">mF</div>
-        <div>
-          <h1 class="brand-name">meuFeed</h1>
-          <p class="brand-subtitle">Notícias e atualizações em um só lugar.</p>
-        </div>
-      </div>
-      <p class="header-meta">Painel de notícias · Atualização automática</p>
-    </header>
-    <!-- %after-body-begin.html% -->
-    {{#each dates}}
-      <section class="daily-content js-toggle-accordions-scope">
-        <h2 class="daily-heading">
-          <button class="daily-heading-toggle" type="button" aria-expanded="true" title="Clique para expandir ou recolher as fontes deste dia.">
-            <time class="daily-heading-toggle__weekday js-offset-weekday" data-offset-date={{isoOffsetPublishDate}} datetime="{{isoUtcPublishTime}}">{{isoOffsetPublishDate}}</time>
-            <time class="daily-heading-toggle__date js-offset-date" data-offset-date={{isoOffsetPublishDate}} datetime="{{isoUtcPublishTime}}"></time>
-          </button>
-        </h2>
-        <ul class="sources card">
-          {{#each sources}}
-            <li class="card__section">
-              <section class="js-toggle-accordions-scope">
-                <h3 class="source-heading">
-                  <button class="source-heading__name" type="button" aria-expanded="true" title="Clique para expandir ou recolher esta fonte.">{{title}}</button>
-                  <a class="source-heading__link" href="{{siteUrl}}" target="_blank" rel="noopener">Visitar fonte ↗</a>
-                </h3>
-                <section class="articles-per-source">
-                  {{#each articles}}
-                    <article>
-                      <details class="article-expander" data-action="toggle-native-accordion" data-accordion-key="{{id}}">
-                        <summary class="article-expander__title">{{title}}</summary>
-                        <a class="article-summary-link article-summary-box-outer" href="{{link}}" target="_blank" rel="noopener">
-                          <div class="article-summary-box-inner media-object">
-                            {{#if imageUrl}}
-                              <img src="{{imageUrl}}" loading="lazy" class="media-object__media article-image" />
-                            {{/if}}
-                            <span class="media-object__text">
-                              <span>{{description}}</span>
-                              {{#if readingTimeInMin}}
-                                &ensp;<span class="article-reading-time">(&hairsp;{{readingTimeInMin}} min&hairsp;)</span>
-                              {{/if}}
-                            </span>
-                          </div>
-                        </a>
-                      </details>
-                    </article>
-                  {{/each}}
-                </section>
-              </section>
-            </li>
-          {{/each}}
-        </ul>
-      </section>
-    {{/each}}
-    <footer>
-      {{#if githubRunUrl}}
-      <a class="footer-link" href="{{githubRunUrl}}"><time id="build-timestamp" datetime="{{siteBuildTimestamp}}">{{siteBuildTimestamp}}</time></a>
-      {{else}}
-      <time id="build-timestamp" datetime="{{siteBuildTimestamp}}">{{siteBuildTimestamp}}</time>
-      {{/if}}
-      <a class="footer-link" href="{{projectUrl}}">osmosfeed {{cliVersion}}</a>
-    </footer>
-    <script src="index.js?v1.14.4"></script>
-    <script>
-      // Os controles do dia e da fonte expandem/recolhem os detalhes de notícias
-      // somente dentro do respectivo escopo, sem interferir nos accordions individuais.
-      document.addEventListener("click", function (event) {
-        const button = event.target.closest(".daily-heading-toggle, .source-heading__name");
-        if (!button) return;
-
-        const scope = button.classList.contains("daily-heading-toggle")
-          ? button.closest(".daily-content")
-          : button.closest(".js-toggle-accordions-scope");
-        if (!scope) return;
-
-        const details = Array.from(scope.querySelectorAll("details.article-expander"));
-        if (!details.length) return;
-
-        const shouldOpen = details.some((item) => !item.open);
-        details.forEach((item) => { item.open = shouldOpen; });
-        button.setAttribute("aria-expanded", String(shouldOpen));
-        button.classList.toggle("is-expanded", shouldOpen);
-        event.preventDefault();
-        event.stopPropagation();
-      });
-    </script>
-    <!-- %before-body-end.html% -->
-  </body>
+<head>
+  <title>{{siteTitle}}</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0b4788" />
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+  <link rel="alternate" type="application/rss+xml" title="{{siteTitle}}" href="{{feedHref}}" />
+  <link href="index.css?v1.14.4" rel="stylesheet" />
+  <style>
+    :root {
+      color-scheme:light; --ink:#10243d; --muted:#64748b; --line:#dce6f0;
+      --paper:#fff; --canvas:#f3f7fb; --blue:#0b4b8e; --bright:#1689e8;
+      --accent:#0b65b7; --accent-soft:#e8f2fc; --body-color:var(--ink);
+      --body-bg:var(--canvas); --body-padding:0 0 36px; --body-stack-gap:24px;
+      --card-bg:var(--paper); --card-border-color:var(--line); --card-padding:18px;
+      --card-radius:12px; --card-shadow:0 2px 8px rgba(20,50,80,.08);
+      --daily-heading-color:var(--ink); --daily-heading-hover-color:var(--accent);
+      --article-title-color:var(--ink); --article-title-expanded-color:var(--accent);
+      --article-summary-color:#334155; --article-summary-hover-color:var(--ink);
+      --source-name-color:var(--blue); --source-name-hover-color:var(--accent);
+      --source-link-color:var(--accent); --source-link-hover-color:var(--blue);
+      --footer-color:var(--muted); --footer-link-text:var(--accent); --footer-link-hover-color:var(--ink);
+    }
+    *{box-sizing:border-box}
+    html{background:var(--canvas)!important}
+    body{max-width:1600px!important;margin:0 auto!important;padding:0 24px 34px!important;gap:24px!important;background:var(--canvas)!important;color:var(--ink)!important;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;line-height:1.45!important}
+    .site-header{margin:0 -24px;padding:20px 32px;background:linear-gradient(115deg,#0a3e79,#125da5);color:#fff;display:flex;align-items:center;justify-content:space-between;gap:24px}
+    .brand-line{display:flex;align-items:center;gap:15px}.brand-mark{display:grid;place-items:center;width:52px;height:52px;border-radius:12px;background:#fff;color:#0b4b8e;font-size:24px;font-weight:850;letter-spacing:-1px}
+    .brand-name{margin:0;color:#fff;font-size:clamp(1.8rem,3vw,2.5rem);font-weight:800;letter-spacing:-.05em;line-height:1.05}
+    .brand-subtitle{margin:4px 0 0;color:#d8e9fb;font-size:.95rem}
+    .header-meta{margin:0;color:#e5f1fc;font-size:.9rem;text-align:right}
+    .daily-content{margin:0 0 24px}.daily-heading{margin:0 0 14px!important;font-size:1rem!important}
+    .daily-heading-toggle{padding:0!important;display:flex!important;align-items:baseline!important;gap:10px!important;color:var(--ink)!important;text-transform:none!important}
+    .daily-heading-toggle__weekday{font-size:1.35rem!important;font-weight:750!important}.daily-heading-toggle__date{color:var(--muted);font-size:.95rem!important}
+    .sources.card{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:14px!important;margin:0!important;padding:0!important;list-style:none!important;background:transparent!important;border:0!important;overflow:visible!important}
+    .card__section{min-width:0;padding:16px!important;background:var(--paper)!important;border:1px solid var(--line)!important;border-top:3px solid var(--bright)!important;border-radius:12px!important;box-shadow:var(--card-shadow)!important}
+    .source-heading{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:10px;margin:0 0 8px!important;padding:0 0 10px;border-bottom:1px solid var(--line)}
+    .source-heading__name{color:var(--blue)!important;font-size:1.08rem!important;font-weight:800!important;letter-spacing:-.02em;text-align:left}
+    .source-heading__link{flex:none;padding:5px 8px;border-radius:18px;background:var(--accent-soft);color:var(--accent)!important;font-size:.75rem;font-weight:700;text-decoration:none!important}
+    .source-heading__link:hover{background:var(--accent);color:#fff!important}
+    .articles-per-source{min-width:0}.article-expander{padding:12px 0!important;border-bottom:1px solid #edf2f7!important}.article-expander:last-child{border-bottom:0!important}
+    .article-expander__title{color:var(--ink)!important;font-size:1rem!important;line-height:1.35!important;font-weight:750!important;cursor:pointer!important}
+    .article-expander__title:hover,.article-expander[open] .article-expander__title{color:var(--accent)!important}
+    .article-summary-link{display:block;margin-top:10px;color:var(--article-summary-color)!important;font-size:.87rem;line-height:1.5;text-decoration:none!important}
+    .article-summary-box-inner{display:grid!important;grid-template-columns: minmax(110px,38%) minmax(0,1fr)!important;align-items:start!important;gap:12px!important;border:0!important;padding:0!important}
+    .article-summary-box-inner .media-object__media{grid-area:auto!important;width:100%!important;height:auto!important;aspect-ratio:16/10!important;object-fit:cover!important;margin:0!important;border:1px solid var(--line)!important;border-radius:7px!important;background:#dceafa}
+    .article-summary-box-inner .media-object__text{grid-area:auto!important;min-width:0!important}
+    .article-reading-time{color:var(--muted)!important;white-space:nowrap;font-size:.78rem}
+    .missing-image{display:block;width:100%;aspect-ratio:16/10;object-fit:cover;border:1px solid var(--line);border-radius:7px;background:#dceafa}
+    .article-date{display:block;margin-top:10px;color:#526b83;font-size:.78rem}
+    footer{margin-top:8px;padding:14px 16px;border:1px solid #b8d6f8;border-radius:10px;background:#e8f2ff;color:#244d7a!important;font-size:.82rem}
+    .footer-link{color:var(--accent)!important;text-decoration:none}.footer-link:hover{text-decoration:underline}
+    @media(max-width:1100px){.sources.card{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+    @media(max-width:700px){body{padding:0 12px 24px!important;gap:18px!important}.site-header{margin:0 -12px;padding:18px 16px;align-items:flex-start;flex-direction:column}.header-meta{text-align:left}.sources.card{grid-template-columns:1fr!important}.card__section{padding:14px!important}}
+  </style>
+  <!-- %before-head-end.html% -->
+</head>
+<body>
+  <header class="site-header">
+    <div class="brand-line"><div class="brand-mark" aria-hidden="true">mF</div><div><h1 class="brand-name">meuFeed</h1><p class="brand-subtitle">Seu agregador de notícias</p></div></div>
+    <p class="header-meta">Informação em um só lugar · Atualização automática</p>
+  </header>
+  <!-- %after-body-begin.html% -->
+  {{#each dates}}
+    <section class="daily-content js-toggle-accordions-scope">
+      <h2 class="daily-heading"><button class="daily-heading-toggle" type="button" aria-expanded="true" title="Expandir ou recolher as fontes deste dia"><time class="daily-heading-toggle__weekday js-offset-weekday" data-offset-date={{isoOffsetPublishDate}} datetime="{{isoUtcPublishTime}}">{{isoOffsetPublishDate}}</time><time class="daily-heading-toggle__date js-offset-date" data-offset-date={{isoOffsetPublishDate}} datetime="{{isoUtcPublishTime}}"></time></button></h2>
+      <ul class="sources card">
+        {{#each sources}}
+          <li class="card__section"><section class="js-toggle-accordions-scope">
+            <h3 class="source-heading"><button class="source-heading__name" type="button" aria-expanded="true" title="Expandir ou recolher notícias desta fonte">{{title}}</button><a class="source-heading__link" href="{{siteUrl}}" target="_blank" rel="noopener">Ver mais →</a></h3>
+            <section class="articles-per-source">
+              {{#each articles}}
+                <article>
+                  <details class="article-expander" data-action="toggle-native-accordion" data-accordion-key="{{id}}">
+                    <summary class="article-expander__title">{{title}}</summary>
+                    <a class="article-summary-link article-summary-box-outer" href="{{link}}" target="_blank" rel="noopener">
+                      <div class="article-summary-box-inner media-object">
+                        {{#if imageUrl}}<img src="{{imageUrl}}" loading="lazy" class="media-object__media article-image" alt="" />{{else}}<img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 200'%3E%3Crect width='320' height='200' rx='8' fill='%23dceafa'/%3E%3Crect x='100' y='45' width='120' height='90' rx='8' fill='none' stroke='%2386a9cc' stroke-width='8'/%3E%3Ccircle cx='190' cy='68' r='10' fill='%2386a9cc'/%3E%3Cpath d='M108 125l38-40 25 24 18-18 23 34z' fill='%2386a9cc'/%3E%3Ctext x='160' y='170' text-anchor='middle' font-family='Arial,sans-serif' font-size='18' fill='%233c6289'%3EImagem indispon%C3%ADvel%3C/text%3E%3C/svg%3E" class="media-object__media missing-image" alt="Imagem não disponível" />{{/if}}
+                        <span class="media-object__text"><span>{{description}}</span>{{#if readingTimeInMin}} &ensp;<span class="article-reading-time">({{readingTimeInMin}} min)</span>{{/if}}</span>
+                      </div>
+                    </a>
+                    <time class="article-date js-offset-date" data-offset-date="{{isoOffsetPublishDate}}" datetime="{{isoUtcPublishTime}}">{{isoOffsetPublishDate}}</time>
+                  </details>
+                </article>
+              {{/each}}
+            </section>
+          </section></li>
+        {{/each}}
+      </ul>
+    </section>
+  {{/each}}
+  <footer>{{#if githubRunUrl}}<a class="footer-link" href="{{githubRunUrl}}"><time id="build-timestamp" datetime="{{siteBuildTimestamp}}">{{siteBuildTimestamp}}</time></a>{{else}}<time id="build-timestamp" datetime="{{siteBuildTimestamp}}">{{siteBuildTimestamp}}</time>{{/if}} · <a class="footer-link" href="{{projectUrl}}">osmosfeed {{cliVersion}}</a></footer>
+  <script src="index.js?v1.14.4"></script>
+  <script>
+    document.addEventListener("click",function(event){
+      const button=event.target.closest(".daily-heading-toggle,.source-heading__name");if(!button)return;
+      const scope=button.classList.contains("daily-heading-toggle")?button.closest(".daily-content"):button.closest(".js-toggle-accordions-scope");
+      if(!scope)return;const details=Array.from(scope.querySelectorAll("details.article-expander"));if(!details.length)return;
+      const shouldOpen=details.some(item=>!item.open);details.forEach(item=>{item.open=shouldOpen});
+      button.setAttribute("aria-expanded",String(shouldOpen));button.classList.toggle("is-expanded",shouldOpen);event.preventDefault();event.stopPropagation();
+    });
+    document.addEventListener("error",function(event){const img=event.target;if(!(img instanceof HTMLImageElement)||!img.classList.contains("article-image"))return;img.onerror=null;img.src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 200'%3E%3Crect width='320' height='200' fill='%23dceafa'/%3E%3Ctext x='160' y='105' text-anchor='middle' font-family='Arial' font-size='18' fill='%233c6289'%3EImagem indispon%C3%ADvel%3C/text%3E%3C/svg%3E";img.classList.add("missing-image");img.alt="Imagem não disponível";},true);
+  </script>
+  <!-- %before-body-end.html% -->
+</body>
 </html>
